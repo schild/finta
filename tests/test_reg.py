@@ -49,20 +49,12 @@ def test_wma():
     ma = TA.WMA(ohlc, period=20)
     talib_ma = talib.WMA(ohlc['close'], timeperiod=20)
 
-    # assert round(talib_ma[-1], 5) == round(ma.values[-1], 5)
-    # assert 1511.96547 == 1497.22193
-    pass  # close enough
-
 
 def test_kama():
     '''test TA.KAMA'''
 
     ma = TA.KAMA(ohlc, period=30)
     talib_ma = talib.KAMA(ohlc['close'], timeperiod=30)
-
-    # assert round(talib_ma[-1], 5) == round(ma.values[-1], 5)
-    # assert 1519.60321 == 1524.26954
-    pass  # close enough
 
 
 def test_tema():
@@ -79,10 +71,6 @@ def test_trima():
 
     ma = TA.TRIMA(ohlc, 30)
     talib_ma = talib.TRIMA(ohlc['close'])
-
-    #assert round(talib_ma[-1], 5) == round(ma.values[-1], 5)
-    # assert 1509.0876041666781 == 1560.25056
-    pass  # close enough
 
 
 def test_trix():
@@ -168,14 +156,6 @@ def test_bbands():
     bb = TA.BBANDS(ohlc, 20)
     talib_bb = talib.BBANDS(ohlc['close'], timeperiod=20)
 
-    # assert int(bb['BB_UPPER'][-1]) == int(talib_bb[0].values[-1])
-    # assert 8212 == 8184
-
-    # assert int(bb['BB_LOWER'][-1]) == int(talib_bb[2].values[-1])
-    # assert 6008 == 6036
-
-    pass  # close enough
-
 
 def test_dmi():
     '''test TA.DMI'''
@@ -183,16 +163,8 @@ def test_dmi():
     dmp = TA.DMI(ohlc, 14, True)["DI+"]
     talib_dmp = talib.PLUS_DI(ohlc["high"], ohlc["low"], ohlc["close"], timeperiod=14)
 
-    # assert talib_dmp[-1] == dmp.values[-1]
-    # assert 25.399441371241316 == 22.867910021116124
-    pass  #  close enough
-
     dmn = TA.DMI(ohlc, 14, True)["DI-"]
     talib_dmn = talib.MINUS_DI(ohlc["high"], ohlc["low"], ohlc["close"], timeperiod=14)
-
-    # assert talib_dmn[-1] == dmn.values[-1]
-    # assert 20.123182007302802 == 19.249274328040045
-    pass  # close enough
 
 
 def test_adx():
@@ -201,20 +173,12 @@ def test_adx():
     adx = TA.ADX(ohlc, period=12)
     ta_adx = talib.ADX(ohlc["high"], ohlc["low"], ohlc["close"], timeperiod=12)
 
-    # assert int(ta_adx[-1]) == int(adx.values[-1])
-    # assert 26 == 27
-    pass  # close enough
-
 
 def test_obv():
     """test OBC"""
 
     obv = TA.OBV(ohlc)
     talib_obv = talib.OBV(ohlc["close"], ohlc["volume"])
-
-    #assert obv.values[-1] == talib_obv[-1]
-    #assert -149123.0 == -148628.0
-    pass  # close enough
 
 
 def test_cmo():
@@ -223,10 +187,6 @@ def test_cmo():
     cmo = TA.CMO(ohlc, period=9)
     talib_cmo = talib.CMO(ohlc["close"], timeperiod=9)
 
-    # assert round(talib_cmo[-1], 2) == round(cmo.values[-1], 2)
-    # assert -35.99 == -35.66
-    pass  # close enough
-
 
 def test_stoch():
     """test TA.STOCH"""
@@ -234,22 +194,12 @@ def test_stoch():
     stoch = TA.STOCH(ohlc, 9)
     talib_stoch = talib.STOCH(ohlc["high"], ohlc["low"], ohlc["close"], 9)
 
-    #  talib_stoch[0] is "slowk"
-    # assert talib_stoch[0][-1] == stoch.values[-1]
-    # assert 76.27794470586021 == 80.7982311922445
-    pass  # close enough
-
 
 def test_sar():
     """test TA.SAR"""
 
     sar = TA.SAR(ohlc)
     talib_sar = talib.SAR(ohlc.high, ohlc.low)
-
-    # assert sar.values[-1] == talib_sar.values[-1]
-    # 1466.88618052864 == 1468.3663877395456
-    # close enough
-    pass
 
 
 def test_williams():
