@@ -323,12 +323,10 @@ class TA:
             name="{0} period ZLEMA.".format(period),
         )
 
-        zlema = pd.Series(
+        return pd.Series(
             ema.ewm(span=period, adjust=adjust).mean(),
             name="{0} period ZLEMA".format(period),
         )
-
-        return zlema
 
     @classmethod
     def WMA(cls, ohlc: DataFrame, period: int = 9, column: str = "close") -> Series:
@@ -366,7 +364,7 @@ class TA:
 
         import math
 
-        half_length = int(period / 2)
+        half_length = period // 2
         sqrt_length = int(math.sqrt(period))
 
         wmaf = cls.WMA(ohlc, period=half_length)
@@ -774,7 +772,7 @@ class TA:
         def _dmi(index):
             time = t.iloc[index]
             if (index - time) < 0:
-                subset = ohlc.iloc[0:index]
+                subset = ohlc.iloc[:index]
             else:
                 subset = ohlc.iloc[(index - time) : index]
             return cls.RSI(subset, period=time, adjust=adjust).values[-1]
@@ -871,7 +869,7 @@ class TA:
 
         length = len(ohlc)
         high, low, close = ohlc.high, ohlc.low, ohlc.close
-        psar = close[0 : len(close)]
+        psar = close[:len(close)]
         psarbull = [None] * length
         psarbear = [None] * length
         bull = True
@@ -894,13 +892,12 @@ class TA:
                     psar[i] = hp
                     lp = low[i]
                     af = iaf
-            else:
-                if high[i] > psar[i]:
-                    bull = True
-                    reverse = True
-                    psar[i] = lp
-                    hp = high[i]
-                    af = iaf
+            elif high[i] > psar[i]:
+                bull = True
+                reverse = True
+                psar[i] = lp
+                hp = high[i]
+                af = iaf
 
             if not reverse:
                 if bull:
@@ -976,8 +973,7 @@ class TA:
         Contains 42% of price movements(noise) within bands.
         """
 
-        BB = TA.BBANDS(ohlc, period=10, std_multiplier=0.8, column=column)
-        return BB
+        return TA.BBANDS(ohlc, period=10, std_multiplier=0.8, column=column)
 
     @classmethod
     def BBWIDTH(
@@ -1002,12 +998,10 @@ class TA:
         """
 
         BB = TA.BBANDS(ohlc, period, MA, column)
-        percent_b = pd.Series(
+        return pd.Series(
             (ohlc["close"] - BB["BB_LOWER"]) / (BB["BB_UPPER"] - BB["BB_LOWER"]),
             name="%b",
         )
-
-        return percent_b
 
     @classmethod
     def KC(
@@ -1206,12 +1200,10 @@ class TA:
         highest_high = ohlc["high"].rolling(center=False, window=period).max()
         lowest_low = ohlc["low"].rolling(center=False, window=period).min()
 
-        STOCH = pd.Series(
+        return pd.Series(
             (ohlc["close"] - lowest_low) / (highest_high - lowest_low) * 100,
             name="{0} period STOCH %K".format(period),
         )
-
-        return STOCH
 
     @classmethod
     def STOCHD(cls, ohlc: DataFrame, period: int = 3, stoch_period: int = 14) -> Series:
@@ -1267,9 +1259,11 @@ class TA:
         This is because they are stuck with one time frame. The Ultimate Oscillator attempts to correct this fault by incorporating longer
         time frames into the basic formula."""
 
-        k = []  # current low or past close
-        for row, _row in zip(ohlc.itertuples(), ohlc.shift(1).itertuples()):
-            k.append(min(row.low, _row.close))
+        k = [
+            min(row.low, _row.close)
+            for row, _row in zip(ohlc.itertuples(), ohlc.shift(1).itertuples())
+        ]
+
         bp = pd.Series(ohlc[column] - k, name="bp")  # Buying pressure
 
         Average7 = bp.rolling(window=7).sum() / cls.TR(ohlc).rolling(window=7).sum()
@@ -1968,10 +1962,7 @@ class TA:
         comb = pd.concat([bb, kc], axis=1)
 
         def sqz_on(row):
-            if row["BB_LOWER"] > row["KC_LOWER"] and row["BB_UPPER"] < row["KC_UPPER"]:
-                return True
-            else:
-                return False
+            return row["BB_LOWER"] > row["KC_LOWER"] and row["BB_UPPER"] < row["KC_UPPER"]
 
         comb["SQZ"] = comb.apply(sqz_on, axis=1)
 
@@ -2216,14 +2207,10 @@ class TA:
         """
 
         def is_bullish_fractal(x):
-            if x[period] == min(x):
-                return True
-            return False
+            return x[period] == min(x)
 
         def is_bearish_fractal(x):
-            if x[period] == max(x):
-                return True
-            return False
+            return x[period] == max(x)
 
         window_size = period * 2 + 1
         bearish_fractals = pd.Series(
@@ -2286,15 +2273,13 @@ class TA:
             j = 1 - ex
             k = ex - 1
             l = np.where(x > 0, j, k)
-            output = l / (1 + ex)
-            return output
+            return l / (1 + ex)
 
         def osc(input_dev, mean, power):
             variance = Series(power).rolling(window=lookback_period).sum() / lookback_period
             calc_dev = np.sqrt(variance) * mean
             y = (input_dev / calc_dev)
-            oscLine = tanh(y)
-            return oscLine
+            return tanh(y)
 
         dev = 3.2 * std
         power = np.power(dev / ma, 2)
